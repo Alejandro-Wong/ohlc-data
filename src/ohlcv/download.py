@@ -12,7 +12,7 @@ def main():
     # Check for ohlc_database folder
     if not os.path.isdir('ohlc_database'):
 
-        timeframes = ['m5','m15','m30','h1','h4','d1','w1']
+        timeframes = ['m5','m15','m30','h1','h4','d1']
         os.mkdir('./ohlc_database')
         for t in timeframes:
             os.mkdir(f'./ohlc_database/{t}')
@@ -25,6 +25,10 @@ def main():
     # Acceptable period and interval
     period_accept = ['y','d']
     interval_accept = ['m','h','d']    
+
+    # .env path for alpaca keys
+    env_path = os.path.dirname(ohlcv.__file__)
+    ohlcv_files = [f for f in os.listdir(env_path)]
 
     # Choose Single Ticker or Multi-Ticker
     while True:
@@ -66,12 +70,8 @@ def main():
             except ValueError:
                 continue
 
-
     # Choose source
     while True:
-        env_path = os.path.dirname(ohlcv.__file__)
-        ohlcv_files = [f for f in os.listdir(env_path)]
-
         try:
             print('\n')
             source = input('Source (1 for alpaca, 2 for yfinance): ')
@@ -131,7 +131,6 @@ def main():
             start_date = None
             end_date = None
             break
-
         elif  start_input == '' and end_input != '':
             start_date = None
             try:
@@ -139,7 +138,6 @@ def main():
                 break
             except ValueError:
                 print('Invalid datetime format. Please use YYYY-MM-DD or YYYY-MM-DD HH:MM:SS')
-
         elif start_input != '' and end_input != '':
             try:
                 start_date = datetime.strptime(start_input, format)
@@ -147,7 +145,6 @@ def main():
                 break
             except ValueError:
                 print('Invalid datetime format. Please use YYYY-MM-DD or YYYY-MM-DD HH:MM:SS')
-        
         else:
             print('Check Start Date and End Date inputs and try again. Something is wrong.')
             continue
@@ -163,8 +160,7 @@ def main():
         else 'h1' if interval == '1h'
         else 'h4' if interval == '4h'
         else 'd1' if interval == '1d'
-        # else 'w1' if interval == 'w1'
-        else None
+        else None # TO DO: create function for creating new folder for new interval
         )
 
     if int(single_multi) == 2:
