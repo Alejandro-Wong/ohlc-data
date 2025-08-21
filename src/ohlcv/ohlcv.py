@@ -59,50 +59,6 @@ class OHLC:
 
         return df.round(decimal_places)
     
-    def _authenticate(self) -> None:
-        """
-        Create .env file for alpaca-py API and Secret keys to enable use of from_alpaca() method
-        """
-
-        print("\n","API and Secret key for Alpaca API not found","\n")
-        print("To obtain Alpaca API keys, create a free account at https://app.alpaca.markets/signup","\n")
-
-        authenticated = False
-
-        while authenticated == False:
-
-            api_key = input("Enter API key: ")
-            secret_key = input("Enter Secret key: ")
-
-            # Test key validity
-            try:
-                client = StockHistoricalDataClient(api_key, secret_key)
-                multisymbol_request_params = StockLatestQuoteRequest(symbol_or_symbols=["GLD"])
-                latest_multisymbol_quotes = client.get_stock_latest_quote(multisymbol_request_params)
-                gld_latest_ask_price = latest_multisymbol_quotes["GLD"].ask_price
-
-                if gld_latest_ask_price:
-                    print("\n","Test request successful!","\n")
-                else:
-                    print("Test request unsuccessful")
-
-            except Exception as e:
-                if type(e) == APIError:
-                    print("\n","Problem encountered while authenticating keys. Try again","\n")
-                else:
-                    print(f'Error: {e}')
-            else:
-                print("API and Secret keys authenticated!\n")
-                authenticated = True
-                # Write keys to .env file
-                with open('./.env', 'w') as f:
-                    f.write(f'API_KEY={api_key}\n')
-                    f.write(f'SECRET_KEY={secret_key}\n')
-
-                print(".env file created sucessfuly! Alpaca API access should now be granted")
-
-        # Refresh module
-        importlib.reload(ohlcv)
 
     def _ohlc_agg(self) -> dict:
         """
@@ -167,17 +123,10 @@ class OHLC:
         Data from 2016 to present is available for all intervals
         """
 
-        # Check for environment variables
         load_dotenv()
 
-        env_path = ohlcv.__file__[:-8]
-        ohlcv_files = [f for f in os.listdir(env_path)]
-
-        if '.env' in ohlcv_files:
-            api_key = os.environ.get('API_KEY')
-            secret_key = os.environ.get('SECRET_KEY')
-        else:
-            self._authenticate()
+        api_key = os.environ.get('API_KEY')
+        secret_key = os.environ.get('SECRET_KEY')
 
         client = StockHistoricalDataClient(api_key=api_key, secret_key=secret_key)
 
