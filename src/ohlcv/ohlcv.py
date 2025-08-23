@@ -4,16 +4,10 @@ import pandas as pd
 from dotenv import load_dotenv
 from datetime import date, timedelta
 
-from alpaca.common.rest import APIError
-
-import ohlcv
-import importlib
-
-from alpaca.data.requests import StockBarsRequest, StockLatestQuoteRequest
+import yfinance as yf
+from alpaca.data.requests import StockBarsRequest
 from alpaca.data.timeframe import TimeFrame, TimeFrameUnit
 from alpaca.data.historical import StockHistoricalDataClient 
-
-import yfinance as yf
 
 
 class OHLC:
