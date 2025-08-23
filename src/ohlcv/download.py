@@ -8,16 +8,9 @@ from ohlcv.authenticate import authenticate_alpaca
 
 
 def main():
-
-    # Check for ohlc_database folder
-    if not os.path.isdir('ohlc_database'):
-
-        timeframes = ['m5','m15','m30','h1','h4','d1']
-        os.mkdir('./ohlc_database')
-        for t in timeframes:
-            os.mkdir(f'./ohlc_database/{t}')
-    else:
-        print('ohlc database found')
+    """
+    Script for downloading OHLC data from either Alpaca or Yahoo Finance APIs to a designated folder
+    """
 
     # Symbol list
     symbols = []
@@ -30,6 +23,20 @@ def main():
     env_path = os.path.dirname(ohlcv.__file__)
     ohlcv_files = [f for f in os.listdir(env_path)]
 
+    # Check for ohlc_database folder
+    print('\n','Checking for ohlc_database folder...','\n')
+    if not os.path.isdir('./ohlc_database'):
+        print('\n',f'ohlc_database not found, creating ohlc_database folder at {os.getcwd()}','\n')
+
+        timeframes = ['m5','m15','m30','h1','h4','d1']
+        os.mkdir('./ohlc_database')
+        for t in timeframes:
+            os.mkdir(f'./ohlc_database/{t}')
+        
+        print('\n','ohlc_database folder created','\n')
+    else:
+        print('ohlc_database found')
+
     # Choose Single Ticker or Multi-Ticker
     while True:
         try:
@@ -40,7 +47,6 @@ def main():
             else:
                 print('Invalid choice. Please choose 1 or 2.')
         except ValueError:
-            print('Invalid input')
             continue
 
     # Single Ticker chosen
