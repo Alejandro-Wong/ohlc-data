@@ -2,9 +2,9 @@ import os
 import datetime
 import importlib
 
-import ohlcv
-from ohlcv.ohlcv import OHLC
-from ohlcv.authenticate import authenticate_alpaca
+import ohlc_data
+from ohlc_data.get import OHLC
+from ohlc_data.authenticate import authenticate_alpaca
 
 
 def main():
@@ -20,8 +20,8 @@ def main():
     interval_accept = ['m','h','d']    
 
     # .env path for alpaca keys
-    env_path = os.path.dirname(ohlcv.__file__)
-    ohlcv_files = [f for f in os.listdir(env_path)]
+    env_path = os.path.dirname(ohlc_data.__file__)
+    ohlc_data_files = [f for f in os.listdir(env_path)]
 
     # Check for ohlc_database folder
     print('\n','Checking for ohlc_database folder...','\n')
@@ -81,9 +81,9 @@ def main():
         try:
             print('\n')
             source = input('Source (1 for alpaca, 2 for yfinance): ')
-            if int(source) == 1 and '.env' not in ohlcv_files:
+            if int(source) == 1 and '.env' not in ohlc_data_files:
                 authenticate_alpaca(env_path)
-                importlib.reload(ohlcv.ohlcv)
+                importlib.reload(ohlc_data.get)
                 break
             elif int(source) == 1 or int(source) == 2:
                 break

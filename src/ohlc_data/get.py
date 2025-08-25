@@ -12,7 +12,7 @@ from alpaca.data.historical import StockHistoricalDataClient
 
 class OHLC:
     """
-    Download OHLC data using either yfinance or alpaca APIs.
+    Get OHLC data using either yfinance or alpaca APIs.
 
     args:
         symbol: Ticker symbol. Format: 'ABC' (All caps)
