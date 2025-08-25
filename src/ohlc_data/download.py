@@ -23,19 +23,19 @@ def main():
     env_path = os.path.dirname(ohlc_data.__file__)
     ohlc_data_files = [f for f in os.listdir(env_path)]
 
-    # Check for ohlc_data folder
-    print('\n','Checking for ohlc_data folder...','\n')
-    if not os.path.isdir('./ohlc_data'):
-        print('\n',f'ohlc_data folder not found, creating ohlc_data folder at {os.getcwd()}','\n')
+    # Check for ohlc_csv folder
+    print('\n','Checking for ohlc_csv folder...','\n')
+    if not os.path.isdir('./ohlc_csv'):
+        print('\n',f'ohlc_csv folder not found, creating ohlc_csv folder at {os.getcwd()}','\n')
 
         timeframes = ['m5','m15','m30','h1','h4','d1']
-        os.mkdir('./ohlc_data')
+        os.mkdir('./ohlc_csv')
         for t in timeframes:
-            os.mkdir(f'./ohlc_data/{t}')
+            os.mkdir(f'./ohlc_csv/{t}')
         
-        print('\n','ohlc_data folder created','\n')
+        print('\n','ohlc_csv folder created','\n')
     else:
-        print('ohlc_data found')
+        print('ohlc_csv found')
 
     # Choose Single Ticker or Multi-Ticker
     while True:
@@ -174,12 +174,12 @@ def main():
         if int(source) == 1:
             for symbol in symbols:
                 df = OHLC(symbol, period, interval, start_date, end_date).from_alpaca()
-                df.to_csv(f'ohlc_data/{subdir}/{symbol}_{period}_{interval}.csv')
+                df.to_csv(f'ohlc_csv/{subdir}/{symbol}_{period}_{interval}.csv')
 
         elif int(source) == 2:
             for symbol in symbols:
                 df = OHLC(symbol, period, interval, start_date, end_date).from_yfinance()
-                df.to_csv(f'ohlc_data/{subdir}/{symbol}_{period}_{interval}.csv')
+                df.to_csv(f'ohlc_csv/{subdir}/{symbol}_{period}_{interval}.csv')
     
     else:
         if int(source) == 1:
@@ -187,7 +187,7 @@ def main():
         elif int(source) == 2:
             df = OHLC(symbol, period, interval, start_date, end_date).from_yfinance()
 
-        df.to_csv(f'ohlc_data/{subdir}/{symbol}_{period}_{interval}.csv')
+        df.to_csv(f'ohlc_csv/{subdir}/{symbol}_{period}_{interval}.csv')
 
     print("OHLC data downloaded successfully!")
 
