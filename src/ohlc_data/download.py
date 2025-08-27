@@ -5,7 +5,7 @@ import importlib
 import ohlc_data
 from ohlc_data.get import OHLC
 from ohlc_data.authenticate import authenticate_alpaca
-from utils import validate_date
+from ohlc_data.utils import validate_date
 
 
 def main():
@@ -25,7 +25,7 @@ def main():
     start_date = None
     end_date = None
     date_format = '%Y-%m-%d'
-    datetime_format = '%Y-%m-%d %H:%M%S'
+    datetime_format = '%Y-%m-%d %H:%M:%S'
 
     # .env path for alpaca keys
     env_path = os.path.dirname(ohlc_data.__file__)
