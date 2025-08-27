@@ -9,15 +9,22 @@ from ohlc_data.authenticate import authenticate_alpaca
 
 def main():
     """
-    Script for downloading OHLC data from either Alpaca or Yahoo Finance APIs to a designated folder
+    Creates ohlc_csv folder and timeframe subfolders, walks user through prompts to download
+    OHLC data from Alpaca or Yahoo Finance APIs to appropriate folders
     """
 
-    # Symbol list
+    df = None 
     symbols = []
 
     # Acceptable period and interval
     period_accept = ['y','d']
     interval_accept = ['m','h','d']    
+
+    # Valid Datetime formats
+    start_date = None
+    end_date = None
+    date_format = '%Y-%m-%d'
+    datetime_format = '%Y-%m-%d %H:%M%S'
 
     # .env path for alpaca keys
     env_path = os.path.dirname(ohlc_data.__file__)
@@ -39,121 +46,159 @@ def main():
 
     # Choose Single Ticker or Multi-Ticker
     while True:
-        try:
-            print('\n')
-            single_multi = input('Download data for one symbol (1) or multiple symbols? (2): ')
-            if int(single_multi) == 1 or int(single_multi) == 2:
-                break
-            else:
-                print('Invalid choice. Please choose 1 or 2.')
-        except ValueError:
-            continue
+        print('\n')
+        single_multi = input('Download data for one symbol (1) or multiple symbols? (2): ')
+        if single_multi in ['1', '2']:
+            single_multi = int(single_multi)
+            break
+        else:
+            print('Invalid choice. Choose 1 or 2.')
 
     # Single Ticker chosen
-    if int(single_multi) == 1:
+    if single_multi == 1:
         while True:
-            try:
-                print('\n')
-                symbol = input('Enter symbol: ').strip().upper()
-                if len(symbol) <= 5:
-                    break
-                else:
-                    print('You may have entered an invalid symbol, try again')
-            except ValueError:
-                continue
+            print('\n')
+            symbol = input('Enter symbol: ').strip().upper()
+            if len(symbol) <= 5:
+                break
+            else:
+                print('You may have entered an invalid or unsupported symbol, try again')
 
     # Multi-Ticker chosen
-    elif int(single_multi) == 2:
+    elif single_multi == 2:
         while True:
-            try:
+            print('\n')
+            symbol_list = input('Enter symbols (separate symbols with single space, not case-sensitive): ').strip().upper()
+
+            if not symbol_list:
                 print('\n')
-                symbol_list = input('Enter symbols (comma separated): ').strip().upper()
-                symbols = [x.strip() for x in symbol_list.split(',')]
-                if symbols:
-                    break
-                else:
-                    print('You must enter at least one symbol.')
-            except ValueError:
+                print('You must enter at least one symbol.')
                 continue
+            
+            symbol_split = symbol_list.split(' ')
+            symbols = [symbol.strip() for symbol in symbol_split if symbol.strip()]
+
+            length_check = [len(symbol.strip()) <= 5 for symbol in symbols]
+            if False in length_check:
+                print('\n')
+                print('At least one symbol might have been input incorrectly, make sure to separate each symbol with a space')
+                continue
+            else:
+                break
 
     # Choose source
     while True:
-        try:
-            print('\n')
-            source = input('Source (1 for alpaca, 2 for yfinance): ')
-            if int(source) == 1 and '.env' not in ohlc_data_files:
-                authenticate_alpaca(env_path)
-                importlib.reload(ohlc_data.get)
-                break
-            elif int(source) == 1 or int(source) == 2:
-                break
-            else:
-                print('Invalid choice. Please choose 1 or 2.')
-        except ValueError:
-            print('Invalid Input')
-            continue
+        print('\n')
+        source = input('Source (1 for alpaca, 2 for yfinance): ')
 
-    # Choose period, interval
-    while True:
-        try:
-            print('\n')
-            period = input('Period: ')
-            print('\n')
-            interval = input('Interval: ')
-
-            # Validity check
-            if (
-                any(p in period for p in period_accept) and
-                any(i in interval for i in interval_accept) and
-                len(period) <= 3 and
-                len(interval) <= 4
-                ):
-                break
-            else:
-                print(
-                    'Invalid input. Please check input for correct ticker, period, and interval', '\n',
-                    'Valid periods: "y", "d"', '\n',
-                    'Valid intervals:  "m", "h", "d"', '\n'
-                )
-        except ValueError:
-            continue
-
-    # Choose start and end date
-    while True:
-        if 'd' in interval:
-            format =  '%Y-%m-%d'
-            print('\n')
-            start_input = input('Start date (YYYY-MM-DD) Leave blank if none: ')
-            print('\n')
-            end_input =  input('End date (YYYY-MM-DD) Leave blank if none: ')
+        if source in ['1','2']:
+            source = int(source)
         else:
-            format = '%Y-%m-%d %H:%M:%S'
-            print('\n')
-            start_input = input('Start date (YYYY-MM-DD HH:MM:SS) Leave blank if none: ')
-            print('\n')
-            end_input =  input('End date (YYYY-MM-DD HH:MM:SS) Leave blank if none: ')
+            print('Invalid choice. Please choose 1 or 2.')
+            continue
 
-        if start_input == '' and end_input == '':
-            start_date = None
-            end_date = None
+        if source == 1 and '.env' not in ohlc_data_files:
+            authenticate_alpaca(env_path)
+            importlib.reload(ohlc_data.get)
             break
-        elif  start_input == '' and end_input != '':
-            start_date = None
-            try:
-                end_date = datetime.strptime(end_input, format)
-                break
-            except ValueError:
-                print('Invalid datetime format. Please use YYYY-MM-DD or YYYY-MM-DD HH:MM:SS')
-        elif start_input != '' and end_input != '':
-            try:
-                start_date = datetime.strptime(start_input, format)
-                end_date = datetime.strptime(end_input, format)
-                break
-            except ValueError:
-                print('Invalid datetime format. Please use YYYY-MM-DD or YYYY-MM-DD HH:MM:SS')
         else:
-            print('Check Start Date and End Date inputs and try again. Something is wrong.')
+            break
+    
+    # Choose period
+    while True:
+        print('\n')
+        period = input('Period: ')
+
+        if period:
+            if period[-1] in period_accept and len(period) <= 4:
+                break
+            else:
+                print('\n')
+                print('Invalid input','\n','Valid periods: [number]y or [number]d')
+                continue
+        else:
+            break
+
+    # Choose interval
+    while True: 
+        print('\n')
+        interval = input('Interval: ')
+        
+        if not interval:
+            print('\n')
+            print('Interval required')
             continue
+        else:
+            if  interval[-1] in interval_accept and len(interval) <= 3:
+                break
+            else:
+                print('\n')
+                print('Invalid input','\n', 'Valid intervals: [number]m, [number]h, [number]d ')
+                continue
+
+    # End date/datetime optional if period    
+    if period:
+        if 'd' in interval:
+            while True:
+                print('\n')
+                end_input = input('End date (YYYY-MM-DD) (Optional) : ')
+                if end_input and not validate_date(end_input, date_format):
+                    print('Invalid date, ensure YYYY-MM-DD format')
+                    continue
+                else:
+                    end_date = end_input
+                    break
+        else:
+            while True:
+                print('\n')
+                end_input = input('End Datetime (YYYY-MM-DD HH:MM:SS) (Optional) : ')
+                if end_input and not validate_date(end_input, datetime_format):
+                    print('Invalid datetime, ensure YYYY-MM-DD HH:MM:SS')
+                    continue
+                else:
+                    end_date = end_input
+                    break
+
+    # Start/end date required if no period
+    else:
+        if 'd' in interval:
+            while True:
+                print('\n')
+                start_input = input('Start date (YYYY-MM-DD): ')
+                if not validate_date(start_input, date_format):
+                    print('Invalid date, ensure YYYY-MM-DD format')
+                    continue
+                else:
+                    start_date = start_input
+                    break
+
+            while True:
+                print('\n')
+                end_input = input('End date (YYYY-MM-DD): ')
+                if not validate_date(end_input, date_format):
+                    print('Invalid date, ensure YYYY-MM-DD format')
+                    continue
+                else:
+                    end_date = end_input
+                    break
+        else:
+            while True:
+                start_input = input('Start Datetime (YYYY-MM-DD HH:MM:SS) : ')
+                if not validate_date(start_input, datetime_format):
+                    print('Invalid datetime, ensure YYYY-MM-DD HH:MM:SS')
+                    continue
+                else:
+                    start_date = start_input
+                    break
+
+            while True:
+                end_input = input('End Datetime (YYYY-MM-DD HH:MM:SS) : ')
+                if not validate_date(end_input, datetime_format):
+                    print('Invalid datetime, ensure YYYY-MM-DD HH:MM:SS')
+                    continue
+                else:
+                    end_date = end_input
+                    break
 
     # Download OHLC data, save as CSV
     print('\n')
@@ -169,27 +214,36 @@ def main():
         else None # TO DO: create function for creating new folder for new interval
         )
 
-    if int(single_multi) == 2:
+    if single_multi == 2:
 
-        if int(source) == 1:
-            for symbol in symbols:
+        for symbol in symbols:
+            if source == 1:
                 df = OHLC(symbol, period, interval, start_date, end_date).from_alpaca()
+            elif source == 2:
+                df = OHLC(symbol, period, interval, start_date, end_date).from_yfinance()
+
+            if start_date and end_date:
+                df.to_csv(f'ohlc_csv/{subdir}/{symbol}_{start_date[:4]}{start_date[5:7]}_{end_date[:4]}{end_date[5:7]}_{interval}.csv')
+            elif not start_date and end_date:
+                df.to_csv(f'ohlc_csv/{subdir}/{symbol}_{end_date[:4]}{end_date[5:7]}_{period}_{interval}.csv')
+            else:
                 df.to_csv(f'ohlc_csv/{subdir}/{symbol}_{period}_{interval}.csv')
 
-        elif int(source) == 2:
-            for symbol in symbols:
-                df = OHLC(symbol, period, interval, start_date, end_date).from_yfinance()
-                df.to_csv(f'ohlc_csv/{subdir}/{symbol}_{period}_{interval}.csv')
-    
     else:
         if int(source) == 1:
             df = OHLC(symbol, period, interval, start_date, end_date).from_alpaca()
         elif int(source) == 2:
             df = OHLC(symbol, period, interval, start_date, end_date).from_yfinance()
 
-        df.to_csv(f'ohlc_csv/{subdir}/{symbol}_{period}_{interval}.csv')
+        if start_date != None and end_date != None:
+            df.to_csv(f'ohlc_csv/{subdir}/{symbol}_{start_date[:4]}{start_date[5:7]}_{end_date[:4]}{end_date[5:7]}_{interval}.csv')
+        elif start_date == None and end_date != None:
+            df.to_csv(f'ohlc_csv/{subdir}/{symbol}_{end_date[:4]}{end_date[5:7]}_{period}_{interval}.csv')
+        else:
+            df.to_csv(f'ohlc_csv/{subdir}/{symbol}_{period}_{interval}.csv')
 
     print("OHLC data downloaded successfully!")
+
 
 if __name__ == "__main__":
     main()
