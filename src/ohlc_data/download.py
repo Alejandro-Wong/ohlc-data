@@ -5,6 +5,7 @@ import importlib
 import ohlc_data
 from ohlc_data.get import OHLC
 from ohlc_data.authenticate import authenticate_alpaca
+from utils import validate_date
 
 
 def main():
