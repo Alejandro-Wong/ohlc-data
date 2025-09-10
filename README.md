@@ -32,15 +32,23 @@ https://alpaca.markets/
 
 Running this script will create a folder in the current directory called 'ohlc_csv' if there isn't one already by that name. It will then take you through a series of prompts:<br>
 
-<img src='./example_pics/ohlc_download_script.png'/>
 
-### Download data for one or multiple symbols
-You can choose to get data for one symbol or multiple symbols at once. Symbols are not case sensitve.
+### Download data for one or multiple tickers
+You can choose to get data for one ticker or multiple tickers at once. Tickers don't have to be typed in capital letters.
+<img src='./example_pics/choose_tickers.png'/>
 
-<img src='./example_pics/multi_symbols.png'/>
+<img src='./example_pics/tickers.png'/>
 
 ### Choose source
 You can then choose which API to use. Alpaca requires API keys that you'll be prompted to enter, yfinance does not require API keys.<br>
+
+<img src='./example_pics/source_select.png'/>
+
+### Choose lookback period and interval
+Choose from a number of days or years for the lookback period. Custom periods are also available. You will be prompted for a start and end date/datetime if 'Custom' is chosen.
+
+<img src='./example_pics/lookback.png'/>
+<img src='./example_pics/days.png'/>
 
 ### Valid Periods and Intervals (Timeframes)
 Valid periods: 1d, 5d, 1mo, 3mo, 6mo, 1y, 2y, 5y, 10y, ytd, max<br>
@@ -57,10 +65,9 @@ Valid intervals: 1m, 2m, 5m, 15m, 30m, 60m, 90m, 1h, 1d, 5d, 1wk, 1mo, 3mo<br>
 	
 - Data from 2016 to present is available for all intervals
 
-### Start and End Dates (Optional)
-To get data from a specifc date range, leave **Period** blank and instead use the **Start date** and **End date** fields.<br>
+<img src='./example_pics/interval_select.png'/>
+<img src='./example_pics/success.png'/>
 
-<img src='./example_pics/choose_source.png'/>
 
 
 
