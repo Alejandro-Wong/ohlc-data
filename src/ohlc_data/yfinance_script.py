@@ -2,7 +2,7 @@ import os
 from ohlc_data.utils import dropdown, custom_period, download_and_save
 
 
-def yfinance_script(symbol_input: str | list[str], path: str) -> None:
+def yfinance_script(ticker_input: str | list[str], path: str) -> None:
     """
     Download OHLC data through Yfinance API. Intervals and periods are strict. Daily data
     can span a few decades for some stocks.
@@ -45,12 +45,12 @@ def yfinance_script(symbol_input: str | list[str], path: str) -> None:
     if interval_selected not in os.listdir(path):
         os.mkdir(f'{path}{interval_selected}/')
 
-    # Save multiple symbols to csv folder
-    if isinstance(symbol_input, list):
-        for symbol in symbol_input:
-            download_and_save(path, symbol, 'yfinance', period, interval_selected, start_date, end_date)
-    # Save single symbol to csv folder 
+    # Save multiple ticker to csv folder
+    if isinstance(ticker_input, list):
+        for ticker in ticker_input:
+            download_and_save(path, ticker, 'yfinance', period, interval_selected, start_date, end_date)
+    # Save single ticker to csv folder 
     else:
-        download_and_save(path, symbol_input, 'yfinance', period, interval_selected, start_date, end_date)
+        download_and_save(path, ticker_input, 'yfinance', period, interval_selected, start_date, end_date)
 
     print("OHLC data downloaded successfully!")
