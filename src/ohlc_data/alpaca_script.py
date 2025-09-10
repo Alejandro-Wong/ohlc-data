@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from ohlc_data.utils import validate_date, dropdown, custom_period, download_and_save
 
 
-def alpaca_script(symbol_input: str | list[str], path) -> None:
+def alpaca_script(ticker_input: str | list[str], path) -> None:
     """
     Download OHLC data through Alpaca API. More flexible with intervals, lookback
     period limited to 2016 - today. Pre/Post market data available.
@@ -105,17 +105,20 @@ def alpaca_script(symbol_input: str | list[str], path) -> None:
         os.mkdir(f'{path}{interval}/')
 
     # Pre/Post Market Data or Regular Hours
-    pre_post_prompt = dropdown('Include Pre/Post Market Data?: ', ['Yes','No'])
-    pre_post = True if pre_post_prompt == 'Yes' else False
+    if 'd' not in interval:
+        pre_post_prompt = dropdown('Include Pre/Post Market Data?: ', ['Yes','No'])
+        pre_post = True if pre_post_prompt == 'Yes' else False
+    else:
+        pre_post = False
 
     # Download OHLC data, save as CSV
     print('\n')
     print('Downloading OHLC data...','\n')
 
-    if isinstance(symbol_input, list):
-        for symbol in symbol_input:
-            download_and_save(path, symbol, 'alpaca', period, interval, start_date, end_date, pre_post=pre_post)
+    if isinstance(ticker_input, list):
+        for ticker in ticker_input:
+            download_and_save(path, ticker, 'alpaca', period, interval, start_date, end_date, pre_post=pre_post)
     else:
-        download_and_save(path, symbol_input, 'alpaca', period, interval, start_date, end_date, pre_post=pre_post)
+        download_and_save(path, ticker_input, 'alpaca', period, interval, start_date, end_date, pre_post=pre_post)
         
     print("OHLC data downloaded successfully!")
