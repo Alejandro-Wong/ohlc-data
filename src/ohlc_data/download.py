@@ -1,6 +1,6 @@
 import os
 
-from ohlc_data.symbol_select import symbol_select
+from ohlc_data.ticker_select import ticker_select
 from ohlc_data.alpaca_script import alpaca_script
 from ohlc_data.yfinance_script import yfinance_script
 from ohlc_data.source_select import source_select
@@ -24,16 +24,16 @@ def main():
 
     ohlc_path = './ohlc_csv/'
 
-    # Select Symbols
-    get_symbols = symbol_select()
+    # Select tickers
+    get_tickers = ticker_select()
 
     # Source
     get_source = source_select()
 
     if get_source == 'Yfinance':
-        yfinance_script(get_symbols, ohlc_path)
+        yfinance_script(get_tickers, ohlc_path)
     else:
-        alpaca_script(get_symbols, ohlc_path)
+        alpaca_script(get_tickers, ohlc_path)
 
 if __name__ == "__main__":
     main()
