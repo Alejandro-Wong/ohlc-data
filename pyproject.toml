@@ -1,6 +1,6 @@
 [project]
 name = "ohlc-data"
-version = "0.3.0"
+version = "1.0.0"
 description = ""
 authors = [
     {name = "Alejandro_Wong",email = "alejandroawong@gmail.com"}
