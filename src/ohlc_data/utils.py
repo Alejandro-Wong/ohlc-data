@@ -1,7 +1,26 @@
+import os
 import yfinance as yf
 from datetime import datetime
 from simple_term_menu import TerminalMenu
-from ohlc_data.get import OHLC
+
+from ohlc_data.ohlc import OHLC
+
+
+def create_ohlc_folder(ohlc_path: str) -> None:
+    """
+    Creates ohlc_csv folder and timeframe subfolders 
+    """
+
+    # Check for ohlc_csv folder
+    print('\nChecking for ohlc_csv folder...\n')
+    if not os.path.isdir(ohlc_path):
+        print(f'\nohlc_csv folder not found, creating ohlc_csv folder at {os.getcwd()}\n')
+
+        # Create ohlc_csv folder 
+        os.mkdir(ohlc_path)
+        print('\nohlc_csv folder created\n')
+    else:
+        print('\nohlc_csv found\n')
 
 
 def validate_date(date: str, format_str: str):
@@ -24,8 +43,7 @@ def validate_ticker(ticker: str):
         return False
     else:
         return True
-    # return check
-
+                
 
 def dropdown(prompt:str, options: list[str | int], show_selection: bool=True) -> str:
     """
@@ -119,3 +137,4 @@ def download_and_save(path: str, ticker: str, source: str, period: str = None,
     pm_suffix = '_pm' if pre_post and source == 'alpaca' else ''
 
     df.to_csv(f'{path}{interval}/{filename}{pm_suffix}.csv')
+
