@@ -1,6 +1,6 @@
 [project]
 name = "ohlc-data"
-version = "1.0.2"
+version = "1.0.3"
 description = ""
 authors = [
     {name = "Alejandro_Wong",email = "alejandroawong@gmail.com"}
@@ -25,4 +25,4 @@ requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [project.scripts]
-ohlc_download = "ohlc_data.download:main"
+ohlc_download = "ohlc_data.main:main"
