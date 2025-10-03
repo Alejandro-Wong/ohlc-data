@@ -21,7 +21,7 @@ def source_select():
     while True:
         if source_selected == 'Alpaca' and '.env' not in ohlc_data_files:
             authenticate_alpaca(env_path)
-            importlib.reload(ohlc_data.get)
+            importlib.reload(ohlc_data.ohlc)
             break
         else:
             break
