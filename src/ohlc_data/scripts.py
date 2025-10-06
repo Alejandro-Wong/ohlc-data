@@ -156,13 +156,27 @@ def yfinance_script(ticker_input: str | list[str], path: str) -> None:
         else:
             interval_selected = dropdown('Choose interval: ', ['1d','1wk'])
 
-    else:           
-        if interval_selected == '1d' or interval_selected == '1wk':
-            start_date, end_date = custom_period()
+    else:
+        period = None
+        interval_timeframe = dropdown('Choose interval type: ', ['Intraday', 'Daily +'])
+        start_date, end_date = custom_period() 
+        date_delta = (pd.Timestamp(end_date) - pd.Timestamp(start_date)).days 
+        
+        if interval_timeframe == 'Daily +':
+            if date_delta < 15:
+                interval_selected = '1d'
+            else:
+                interval_selected = dropdown('Choose interval: ', ['1d','1wk'])
         else:
-            start_date, end_date = custom_period(intraday=True)
-
-    period = str(num_period) + period_selected[0].lower()
+            if date_delta <= 7:
+                interval_selected = dropdown('Choose interval: ', ['1m', '2m', '5m', '15m', '30m', '1h', '4h', '1d'])
+            elif date_delta > 7 and date_delta <= 60:
+                interval_selected = dropdown('Choose interval: ', ['5m', '15m', '30m', '1h', '4h', '1d'])
+            elif date_delta > 60 and date_delta < 730:
+                interval_selected = dropdown('Choose interval: ', ['1h', '4h', '1d'])
+            
+    if period_selected != 'Custom':
+        period = str(num_period) + period_selected[0].lower()
 
     if interval_selected not in os.listdir(path):
         os.mkdir(f'{path}{interval_selected}/')
