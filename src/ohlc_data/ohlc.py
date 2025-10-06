@@ -98,7 +98,7 @@ class OHLC:
         df.columns = df.columns.get_level_values(0) # Get rid of multi-index
         df = df[['Open','High','Low','Close','Volume']]
         df = self._round_ohlc(df)
-        if 'd' not in self.interval:
+        if 'd' not in self.interval and 'wk' not in self.interval:
             df.index = pd.to_datetime(df.index).tz_convert('US/Eastern').tz_localize(None)
         else:
             df.index = pd.to_datetime(df.index)
@@ -106,7 +106,6 @@ class OHLC:
         if not self.path:
             return df
         else:
-            # 
             if not self.period:
                 df.to_csv(f'{self.symbol}_{str(self.start)[:4]}_{str(self.end)[:4]}_{self.interval}.csv')
             else:
