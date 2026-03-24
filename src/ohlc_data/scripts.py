@@ -1,7 +1,9 @@
 import os
 import pandas as pd
 from datetime import datetime, timedelta
-from ohlc_data.utils import validate_date, dropdown, custom_period, download_and_save
+
+from ohlc_data.file_utils import download_and_save
+from ohlc_data.script_utils import dropdown, validate_date, custom_period, ticker_select, source_select
 
 
 def alpaca_script(ticker_input: str | list[str], path) -> None:
@@ -190,3 +192,25 @@ def yfinance_script(ticker_input: str | list[str], path: str) -> None:
         download_and_save(path, ticker_input, 'yfinance', period, interval_selected, start_date, end_date)
 
     print("OHLC data downloaded successfully!")
+
+
+def run_scripts(ohlc_path: str) -> None:
+    """
+    Prompt user for tickers and source, then download ohlc data from chosen source (yfinance or alpaca)
+    """
+
+    # Select tickers
+    get_tickers = ticker_select()
+
+    # Source
+    get_source = source_select()
+
+    if get_source == 'Yfinance':
+        yfinance_script(get_tickers, ohlc_path)
+    else:
+        alpaca_script(get_tickers, ohlc_path)
+
+    # Rerun script to download more OHLC Data
+    rerun = dropdown("", ["Download More OHLC Data", "Finish"])
+    if rerun == "Download More OHLC Data":
+        run_scripts(ohlc_path)
