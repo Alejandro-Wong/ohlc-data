@@ -47,7 +47,8 @@ def validate_ticker(ticker: str):
 
 def dropdown(prompt:str, options: list[str | int], show_selection: bool=True) -> str:
     """
-    
+    Dropdown menu to select from two or more choices
+    Returns selected choice
     """
     print('\n')
     print(prompt)
@@ -64,7 +65,14 @@ def dropdown(prompt:str, options: list[str | int], show_selection: bool=True) ->
 
 
 def custom_period(intraday=False) -> tuple[str, str]:
+    """
+    Allows user to input a custom date range when retrieving OHLC data from 
+    selected API.
 
+    Intraday=True for intraday data, must include time into range
+
+    Returns start date and end date
+    """
     start_date = None
     end_date = None
     date_format = '%Y-%m-%d'
@@ -115,6 +123,9 @@ def custom_period(intraday=False) -> tuple[str, str]:
 def download_and_save(path: str, ticker: str, source: str, period: str = None, 
                     interval: str = None, start_date: str = None, end_date: str = None,
                     pre_post: bool = False) -> None:
+    """
+    Save OHLC data to CSV
+    """
     
     if source not in ['yfinance','alpaca']:
         raise ValueError('Incorrect source input. (yfinance or alpaca)')
