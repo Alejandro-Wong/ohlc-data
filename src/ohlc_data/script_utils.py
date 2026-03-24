@@ -6,21 +6,23 @@ from simple_term_menu import TerminalMenu
 from ohlc_data.ohlc import OHLC
 
 
-def create_ohlc_folder(ohlc_path: str) -> None:
+def dropdown(prompt:str, options: list[str | int], show_selection: bool=True) -> str:
     """
-    Creates ohlc_csv folder and timeframe subfolders 
+    Dropdown menu to select from two or more choices
+    Returns selected choice
     """
+    print('\n')
+    print(prompt)
 
-    # Check for ohlc_csv folder
-    print('\nChecking for ohlc_csv folder...\n')
-    if not os.path.isdir(ohlc_path):
-        print(f'\nohlc_csv folder not found, creating ohlc_csv folder at {os.getcwd()}\n')
+    menu_options = options
+    menu = TerminalMenu(menu_options)
+    menu_select = menu.show()
+    menu_selected = menu_options[menu_select]
 
-        # Create ohlc_csv folder 
-        os.mkdir(ohlc_path)
-        print('\nohlc_csv folder created\n')
-    else:
-        print('\nohlc_csv found\n')
+    if show_selection == True:
+        print(menu_selected)
+    
+    return menu_selected
 
 
 def validate_date(date: str, format_str: str):
@@ -44,26 +46,7 @@ def validate_ticker(ticker: str):
     else:
         return True
                 
-
-def dropdown(prompt:str, options: list[str | int], show_selection: bool=True) -> str:
-    """
-    Dropdown menu to select from two or more choices
-    Returns selected choice
-    """
-    print('\n')
-    print(prompt)
-
-    menu_options = options
-    menu = TerminalMenu(menu_options)
-    menu_select = menu.show()
-    menu_selected = menu_options[menu_select]
-
-    if show_selection == True:
-        print(menu_selected)
-    
-    return menu_selected
-
-
+                
 def custom_period(intraday=False) -> tuple[str, str]:
     """
     Allows user to input a custom date range when retrieving OHLC data from 
