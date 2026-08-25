@@ -6,9 +6,10 @@ from datetime import date, timedelta
 
 import yfinance as yf
 from alpaca.data.requests import StockBarsRequest
+from alpaca.data.models import BarSet
 from alpaca.data.timeframe import TimeFrame, TimeFrameUnit
-from alpaca.data.historical import StockHistoricalDataClient 
-
+from alpaca.data.historical import StockHistoricalDataClient
+from alpaca.data.enums import Adjustment
 
 class OHLC:
     """
@@ -27,9 +28,9 @@ class OHLC:
                 symbol: str,
                 period: str = '1y',
                 interval: str = '1d',
-                start: str | date = None,
-                end: str | date = None,
-                path: str = None
+                start: str | date | None = None,
+                end: str | date | None = None,
+                path: str | None = None
                 ):
         
         # Instance variables
@@ -92,7 +93,10 @@ class OHLC:
         else:
             download = yf.download(self.symbol, period=self.period, interval=self.interval,
                                    auto_adjust=auto_adjust, progress=progress, prepost=prepost)
-            
+
+        if download is None or download.empty:
+            raise ValueError(f"No data returned for symbol {self.symbol}")
+
         # Clean downloaded dataframe
         df = download.drop(columns='Adj Close'.strip())
         df.columns = df.columns.get_level_values(0) # Get rid of multi-index
@@ -131,11 +135,13 @@ class OHLC:
             days = 365*int(period_split[1] if 'y' in self.period else int(period_split[1]))
 
         interval_split = re.split('(\\d+)', self.interval)
-        timeframe = (
-            TimeFrame.Day if 'd' in self.interval 
-            else TimeFrame(amount=int(interval_split[1]), unit=TimeFrameUnit.Hour) if 'h' in self.interval 
-            else TimeFrame(amount=int(interval_split[1]), unit=TimeFrameUnit.Minute)
-        )
+
+        if 'd' in self.interval:
+            timeframe = TimeFrame.Day
+        elif 'h' in self.interval:
+            timeframe = TimeFrame(amount=int(interval_split[1]), unit=TimeFrameUnit.Hour)   # type: ignore
+        else:
+            timeframe = TimeFrame(amount=int(interval_split[1]), unit=TimeFrameUnit.Minute) # type: ignore
 
         market_close= timedelta(hours=16, minutes=00)
         intraday_end = str(market_close - timedelta(minutes=int(interval_split[1])))
@@ -155,16 +161,20 @@ class OHLC:
             start_datetime = date.today() - timedelta(days=365)
             end_datetime = date.today()
 
+        start_datetime = pd.to_datetime(start_datetime)
+        end_datetime = pd.to_datetime(end_datetime)
+
+        from typing import cast
         request_params = StockBarsRequest(
         symbol_or_symbols = self.symbol,
-        timeframe=timeframe,
-        adjustment="split",
+        timeframe=cast(TimeFrame, timeframe),
+        adjustment=cast(Adjustment, "split"),
         start=start_datetime,
         end=end_datetime
         )
 
         # Raw DataFrame
-        stock = client.get_stock_bars(request_params)
+        stock = cast(BarSet, client.get_stock_bars(request_params))
         raw_data = stock.df
 
         df = raw_data.reset_index(level=0, drop=True)
@@ -177,15 +187,16 @@ class OHLC:
         df['Volume'] = df['Volume'].astype(int)
 
         if 'd' in self.interval:
-            df.index = pd.to_datetime(df.index).strftime('%Y-%m-%d')
-            df.index = pd.to_datetime(df.index)
-            df.index.names = ['Date']
+            idx = pd.to_datetime(df.index).strftime('%Y-%m-%d')
+            idx = pd.to_datetime(idx)
+            idx.names = ['Date']
+            df.index = idx
         else:
-            df.index = pd.to_datetime(df.index).strftime('%Y-%m-%d %H:%M:%S')
-            df.index = pd.to_datetime(df.index)
-            df.index = df.index.tz_localize('UTC').tz_convert('US/Eastern')
-            df.index = df.index.tz_localize(None)
-            df.index.names = ['Datetime']
+            idx = pd.to_datetime(df.index).strftime('%Y-%m-%d %H:%M:%S')
+            idx = pd.to_datetime(idx)
+            idx = idx.tz_localize('UTC').tz_convert('US/Eastern').tz_localize(None)
+            idx.names = ['Datetime']
+            df.index = idx
 
             if pre_post == False:
                 df = df.between_time('09:30', intraday_end)
@@ -194,7 +205,7 @@ class OHLC:
             return df
         else:
             if not self.period:
-                df.to_csv(f'{self.symbol}_{str(self.start)[:4]}_{(self.end)[:4]}_{self.interval}.csv')
+                df.to_csv(f'{self.symbol}_{str(self.start)[:4]}_{str(self.end)[:4]}_{self.interval}.csv')
             else:
                 df.to_csv(f'{self.symbol}_{self.period}_{self.interval}.csv')
         

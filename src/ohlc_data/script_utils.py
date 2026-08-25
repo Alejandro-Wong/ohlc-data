@@ -1,18 +1,20 @@
 import os
 import ast
+from ast import AST
 import json
 import importlib
 
 import yfinance as yf
 from datetime import datetime
 from simple_term_menu import TerminalMenu
+from typing import cast
 
 import ohlc_data
 from ohlc_data.ohlc import OHLC
 from ohlc_data.authenticate import authenticate_alpaca
 
 
-def dropdown(prompt:str, options: list[str | int], show_selection: bool=True) -> str:
+def dropdown(prompt:str, options: list[str], show_selection: bool=True) -> list[str]:
     """
     Dropdown menu to select from two or more choices
     Returns selected choice
@@ -22,7 +24,7 @@ def dropdown(prompt:str, options: list[str | int], show_selection: bool=True) ->
 
     menu_options = options
     menu = TerminalMenu(menu_options)
-    menu_select = menu.show()
+    menu_select = cast(slice, menu.show())
     menu_selected = menu_options[menu_select]
 
     if show_selection == True:
@@ -114,7 +116,7 @@ module_path = os.path.dirname(ohlc_data.__file__)
 prev_ticker_path = f'{module_path}/multi_tickers.json'
 
 
-def tickers_to_json(tickers: str) -> None:
+def tickers_to_json(tickers: str | list) -> None:
     """
     Saves dictionary of list of tickers to json, or
     adds to existing json.
@@ -176,10 +178,11 @@ def ticker_select() -> str | list[str]:
             ticker = input('Enter ticker: ').strip().upper()
             
             if validate_ticker(ticker):
-                break
+                return ticker
+                
             else:
                 print('You may have entered an invalid or unsupported ticker, try again')
-        return ticker
+        
 
     # Multi-Ticker chosen
     elif ticker_selected == 'Multiple tickers':
@@ -191,7 +194,7 @@ def ticker_select() -> str | list[str]:
             if manual_or_list == "Select from previous tickers":
                 with open(f'{prev_ticker_path}', 'r') as f:
                     data = json.load(f)
-                previous_tickers = dropdown("Previous tickers: ", [t_list for t_list in data.values()])
+                previous_tickers = cast(AST, dropdown("Previous tickers: ", [t_list for t_list in data.values()]))
                 tickers = ast.literal_eval(previous_tickers)
             else:
                 tickers = enter_multi_ticker()
@@ -204,6 +207,9 @@ def ticker_select() -> str | list[str]:
         tickers_to_json(tickers=tickers)
 
         return tickers
+
+    else:
+        raise ValueError("Error encountered while selecting ticker")
     
 
 def source_select():
@@ -221,7 +227,7 @@ def source_select():
     while True:
         if source_selected == 'Alpaca' and '.env' not in ohlc_data_files:
             authenticate_alpaca(env_path)
-            importlib.reload(ohlc_data.ohlc)
+            importlib.reload(ohlc_data)
             break
         else:
             break
@@ -229,32 +235,5 @@ def source_select():
     return source_selected
 
 
-def download_and_save(path: str, ticker: str, source: str, period: str = None, 
-                    interval: str = None, start_date: str = None, end_date: str = None,
-                    pre_post: bool = False) -> None:
-    """
-    Save OHLC data to CSV
-    """
-    
-    if source not in ['yfinance','alpaca']:
-        raise ValueError('Incorrect source input. (yfinance or alpaca)')
 
-    if source == 'yfinance':
-        if pre_post != False:
-            print('Yfinance does not provide pre/post data')
-        df = OHLC(ticker, period, interval, start_date, end_date).from_yfinance()
-    else:
-        df = OHLC(ticker, period, interval, start_date, end_date).from_alpaca(pre_post=pre_post)
-
-    # Save to CSV
-    if start_date and end_date:
-        filename = f'{ticker}_{start_date[:4]}{start_date[5:7]}_{end_date[:4]}{end_date[5:7]}_{interval}'
-    elif end_date:
-        filename = f'{ticker}_{end_date[:4]}{end_date[5:7]}_{period}_{interval}'
-    else:
-        filename = f'{ticker}_{period}_{interval}'
-    
-    pm_suffix = '_pm' if pre_post and source == 'alpaca' else ''
-
-    df.to_csv(f'{path}{interval}/{filename}{pm_suffix}.csv')
 

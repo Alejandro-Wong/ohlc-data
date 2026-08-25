@@ -17,14 +17,14 @@ def alpaca_script(ticker_input: str | list[str], path) -> None:
 
     start_date = None
     end_date = None
-
+    
     # Choose Period
     period_selected = dropdown('Choose lookback period: ', ['Days','Years', 'Custom'])
 
     if period_selected != 'Custom':
         print('Note: Data from Alpaca only goes as far back as 2016')
         while True:
-            period = input(f'Number of {period_selected.lower()}: ') + period_selected[0].lower()
+            period = input(f'Number of {str(period_selected).lower()}: ') + period_selected[0].lower()
             if period_selected == 'Years' and datetime.today().year - int(period[:-1]) < 2016:
                 print('Lookback limit exceeded. Alpaca only provides data as far back as 2016.')
                 continue
@@ -40,7 +40,7 @@ def alpaca_script(ticker_input: str | list[str], path) -> None:
             interval = '1d'
             print('Daily intervals selected')
         else:
-            interval_selected = input(f"Number of {interval_timeframe.lower()}: ")
+            interval_selected = input(f"Number of {str(interval_timeframe).lower()}: ")
             interval = interval_selected + interval_timeframe[0].lower()
             print(interval_selected)
 
@@ -52,7 +52,7 @@ def alpaca_script(ticker_input: str | list[str], path) -> None:
             interval = '1d'
             print('Daily intervals selected')
         else:
-            interval_selected = input(f'Number of {interval_timeframe.lower()}: ')
+            interval_selected = input(f'Number of {str(interval_timeframe).lower()}: ')
             interval = interval_selected + interval_timeframe[0].lower()
             start_date, end_date = custom_period(intraday=True)
 
@@ -67,40 +67,41 @@ def alpaca_script(ticker_input: str | list[str], path) -> None:
         'Invalid datetime, ensure YYYY-MM-DD HH:MM:SS'
     )
 
-    if period_selected == 'Days':
-
-        while True:
-            print('\n')
-            end_input = input(opt_end_datetime)
-            if end_input and not validate_date(end_input, datetime_format):
-                print(opt_end_error)
-                continue
-            elif end_input and validate_date:
-                if pd.to_datetime(end_input) - timedelta(days=int(period[:-1])) < pd.to_datetime('2016-01-01 09:30:00'):
-                    print('Lookback goes beyond 2016 limit')
+    if period is not None:
+        if period_selected == 'Days':
+        
+            while True:
+                print('\n')
+                end_input = input(opt_end_datetime)
+                if end_input and not validate_date(end_input, datetime_format):
+                    print(opt_end_error)
+                    continue
+                elif end_input and validate_date:
+                    if pd.to_datetime(end_input) - timedelta(days=int(period[:-1])) < pd.to_datetime('2016-01-01 09:30:00'):
+                        print('Lookback goes beyond 2016 limit')
+                    else:
+                        break
+                    continue
                 else:
+                    end_date = end_input if end_input else None
                     break
-                continue
-            else:
-                end_date = end_input if end_input else None
-                break
 
-    elif period_selected == 'Years':
-        while True:
-            print('\n')
-            end_input = input(opt_end_datetime)
-            if end_input and not validate_date(end_input, date_format):
-                print(opt_end_error)
-                continue
-            elif end_input and validate_date:
-                if pd.to_datetime(end_input) - timedelta(weeks=int(period[:-1]) * 52) < pd.to_datetime('2016-01-01 09:30:00'):
-                    print('Lookback goes beyond 2016 limit')
+        elif period_selected == 'Years':
+            while True:
+                print('\n')
+                end_input = input(opt_end_datetime)
+                if end_input and not validate_date(end_input, date_format):
+                    print(opt_end_error)
+                    continue
+                elif end_input and validate_date:
+                    if pd.to_datetime(end_input) - timedelta(weeks=int(period[:-1]) * 52) < pd.to_datetime('2016-01-01 09:30:00'):
+                        print('Lookback goes beyond 2016 limit')
+                    else:
+                        break
+                    
                 else:
+                    end_date = end_input if end_input else None
                     break
-                
-            else:
-                end_date = end_input if end_input else None
-                break
 
     # Create new folder for new timeframe / interval
     if interval not in os.listdir(path):
@@ -186,10 +187,10 @@ def yfinance_script(ticker_input: str | list[str], path: str) -> None:
     # Save multiple ticker to csv folder
     if isinstance(ticker_input, list):
         for ticker in ticker_input:
-            download_and_save(path, ticker, 'yfinance', period, interval_selected, start_date, end_date)
+            download_and_save(path, ticker, 'yfinance', period, str(interval_selected), start_date, end_date)
     # Save single ticker to csv folder 
     else:
-        download_and_save(path, ticker_input, 'yfinance', period, interval_selected, start_date, end_date)
+        download_and_save(path, ticker_input, 'yfinance', period, str(interval_selected), start_date, end_date)
 
     print("OHLC data downloaded successfully!")
 

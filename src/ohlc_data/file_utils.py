@@ -1,9 +1,4 @@
 import os
-import ast
-import json
-from datetime import datetime
-
-import ohlc_data
 from ohlc_data.ohlc import OHLC
 
 
@@ -24,8 +19,8 @@ def create_ohlc_folder(ohlc_path: str) -> None:
         print('\nohlc_csv found\n')
 
 
-def download_and_save(path: str, ticker: str, source: str, period: str = None, 
-                    interval: str = None, start_date: str = None, end_date: str = None,
+def download_and_save(path: str, ticker: str, source: str, period: str | None = None, 
+                    interval: str | None = None, start_date: str | None = None, end_date: str | None = None,
                     pre_post: bool = False) -> None:
     """
     Save OHLC data to CSV
@@ -33,6 +28,9 @@ def download_and_save(path: str, ticker: str, source: str, period: str = None,
     
     if source not in ['yfinance','alpaca']:
         raise ValueError('Incorrect source input. (yfinance or alpaca)')
+
+    period = period or '1y'
+    interval = interval or '1d'
 
     if source == 'yfinance':
         if pre_post != False:
