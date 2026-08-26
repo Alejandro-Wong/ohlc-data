@@ -1,15 +1,17 @@
 import os
 import re
 import pandas as pd
+
+from typing import cast
 from dotenv import load_dotenv
 from datetime import date, timedelta
 
 import yfinance as yf
-from alpaca.data.requests import StockBarsRequest
 from alpaca.data.models import BarSet
+from alpaca.data.enums import Adjustment
+from alpaca.data.requests import StockBarsRequest
 from alpaca.data.timeframe import TimeFrame, TimeFrameUnit
 from alpaca.data.historical import StockHistoricalDataClient
-from alpaca.data.enums import Adjustment
 
 class OHLC:
     """
@@ -164,7 +166,6 @@ class OHLC:
         start_datetime = pd.to_datetime(start_datetime)
         end_datetime = pd.to_datetime(end_datetime)
 
-        from typing import cast
         request_params = StockBarsRequest(
         symbol_or_symbols = self.symbol,
         timeframe=cast(TimeFrame, timeframe),
