@@ -35,7 +35,7 @@ class OHLC:
         
         # Instance variables
         self.symbol = symbol
-        self.period = period if start == None else None
+        self.period = period if start is None else None
         self.interval = interval
         self.start = start
         self.end = end
@@ -132,7 +132,7 @@ class OHLC:
 
         if self.period:
             period_split = re.split('(\\d+)', self.period)
-            days = 365*int(period_split[1] if 'y' in self.period else int(period_split[1]))
+            days = 365*int(period_split[1]) if 'y' in self.period else int(period_split[1])
 
         interval_split = re.split('(\\d+)', self.interval)
 
