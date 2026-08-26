@@ -57,26 +57,30 @@ def alpaca_script(ticker_input: str | list[str], path) -> None:
             start_date, end_date = custom_period(intraday=True)
 
     # Optional End date
+    is_daily = 'd' in interval
+
     opt_end_datetime = (
-        'End date (YYYY-MM-DD) (optional): ' if 'd' in interval else
+        'End date (YYYY-MM-DD) (optional): ' if is_daily else
         'End Datetime (YYYY-MM-DD HH:MM:SS) (optional): '
     )
 
     opt_end_error = (
-        'Invalid date, ensure YYYY-MM-DD format' if 'd' in interval else
+        'Invalid date, ensure YYYY-MM-DD format' if is_daily else
         'Invalid datetime, ensure YYYY-MM-DD HH:MM:SS'
     )
 
-    if period is not None:
+    dt_format = date_format if is_daily else datetime_format
+
+    if period:
         if period_selected == 'Days':
         
             while True:
                 print('\n')
                 end_input = input(opt_end_datetime)
-                if end_input and not validate_date(end_input, datetime_format):
+                if end_input and not validate_date(end_input, dt_format):
                     print(opt_end_error)
                     continue
-                elif end_input and validate_date:
+                elif end_input and validate_date(end_input, dt_format):
                     if pd.to_datetime(end_input) - timedelta(days=int(period[:-1])) < pd.to_datetime('2016-01-01 09:30:00'):
                         print('Lookback goes beyond 2016 limit')
                     else:
@@ -90,10 +94,10 @@ def alpaca_script(ticker_input: str | list[str], path) -> None:
             while True:
                 print('\n')
                 end_input = input(opt_end_datetime)
-                if end_input and not validate_date(end_input, date_format):
+                if end_input and not validate_date(end_input, dt_format):
                     print(opt_end_error)
                     continue
-                elif end_input and validate_date:
+                elif end_input and validate_date(end_input, dt_format):
                     if pd.to_datetime(end_input) - timedelta(weeks=int(period[:-1]) * 52) < pd.to_datetime('2016-01-01 09:30:00'):
                         print('Lookback goes beyond 2016 limit')
                     else:
@@ -122,6 +126,7 @@ def alpaca_script(ticker_input: str | list[str], path) -> None:
         for ticker in ticker_input:
             download_and_save(path, ticker, 'alpaca', period, interval, start_date, end_date, pre_post=pre_post)
     else:
+        print(path, period, interval, start_date, end_date)
         download_and_save(path, ticker_input, 'alpaca', period, interval, start_date, end_date, pre_post=pre_post)
         
     print("OHLC data downloaded successfully!")
