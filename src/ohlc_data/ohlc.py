@@ -206,9 +206,9 @@ class OHLC:
             return df
         else:
             if not self.period:
-                df.to_csv(f'{self.symbol}_{str(self.start)[:4]}_{str(self.end)[:4]}_{self.interval}.csv')
+                df.to_csv(f'{self.path}{self.symbol}_{str(self.start)[:4]}_{str(self.end)[:4]}_{self.interval}.csv')
             else:
-                df.to_csv(f'{self.symbol}_{self.period}_{self.interval}.csv')
+                df.to_csv(f'{self.path}{self.symbol}_{self.period}_{self.interval}.csv')
         
         return df
 
